@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Pārskats{% endblock %}
+{% block content %}
+<h1>Pārskats</h1>
+
+<p>Kopā reģistrēti <strong>{{ kopa }}</strong> iesniegumi, no tiem pabeigti (atbildēti vai noraidīti) <strong>{{ pabeigti }}</strong>.
+Vidējais apstrādes laiks pabeigtiem iesniegumiem: <strong>{{ vid }}</strong>.</p>
+<p class="palidziba">Apstrādes laiks — no iesniegšanas līdz statusam «Atbildēts» vai «Noraidīts».</p>
+
+<section aria-labelledby="statusi-virsraksts">
+  <h2 id="statusi-virsraksts">Iesniegumi pa statusiem</h2>
+  <table class="skaitli">
+    <caption>Iesniegumu skaits pa statusiem</caption>
+    <thead><tr><th scope="col">Statuss</th><th scope="col">Skaits</th></tr></thead>
+    <tbody>
+      {% for statuss, skaits in statusi %}
+      <tr><th scope="row"><span class="statuss {{ STATUSA_KLASE[statuss] }}">{{ statuss }}</span></th><td>{{ skaits }}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th scope="row">Kopā</th><td>{{ kopa }}</td></tr></tfoot>
+  </table>
+</section>
+
+<section aria-labelledby="temas-virsraksts">
+  <h2 id="temas-virsraksts">Iesniegumi pa tēmām</h2>
+
+  {# Diagramma ir vizuāls papildinājums; tā pati informācija ir tabulā zemāk (1.1.1), tāpēc ekrānlasītājam paslēpta #}
+  <figure class="diagramma" aria-hidden="true">
+    {% for r in pa_temam %}
+    <div class="josla-rinda">
+      <span class="josla-nosaukums">{{ r.tema }}</span>
+      <span class="josla-ietvars"><span class="josla" style="width: {{ (r.skaits / maks * 100)|round(1) }}%"></span></span>
+      <span class="josla-vertiba">{{ r.skaits }}</span>
+    </div>
+    {% endfor %}
+  </figure>
+  <p class="palidziba">Diagramma rāda iesniegumu skaitu pa tēmām. Tie paši dati ir tabulā.</p>
+
+  <div class="tabulas-ietvars" role="region" aria-labelledby="temas-caption" tabindex="0">
+  <table class="skaitli">
+    <caption id="temas-caption">Iesniegumu skaits un vidējais apstrādes laiks pa tēmām</caption>
+    <thead>
+      <tr>
+        <th scope="col">Tēma</th>
+        <th scope="col">Iesniegumi</th>
+        <th scope="col">Pabeigti</th>
+        <th scope="col">Vidējais apstrādes laiks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in pa_temam %}
+      <tr>
+        <th scope="row">{{ r.tema }}</th>
+        <td>{{ r.skaits }}</td>
+        <td>{{ r.pabeigti or 0 }}</td>
+        <td>{{ dienas(r.vid_dienas) }}{% if r.vid_dienas is none %} <span class="visually-hidden">(nav pabeigtu iesniegumu)</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

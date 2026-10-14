@@ -19,6 +19,7 @@ IZVELNE = [
     ("index", "Sākums", None),
     ("iesniegt", "Iesniegt iesniegumu", {"iedzivotajs", None}),
     ("saraksts", "Iesniegumu saraksts", {"darbinieks"}),
+    ("parskats", "Pārskats", {"vaditajs"}),
 ]
 
 STATUSI = ["Jauns", "Apstrādē", "Atbildēts", "Noraidīts"]
@@ -252,6 +253,47 @@ def iesniegums(numurs):
     ).fetchall()
     return render_template("iesniegums.html", i=i, vesture=vesture, statusi=STATUSI, kludas=kludas,
                            ievade=ievade), (400 if kludas else 200)
+
+
+def dienas(vertiba):
+    """Dienu skaits latviskā formā: 2,6 dienas / 1 diena / — ."""
+    if vertiba is None:
+        return "—"
+    teksts = f"{vertiba:.1f}".replace(".", ",")
+    return f"{teksts} diena" if teksts == "1,0" else f"{teksts} dienas"
+
+
+@app.route("/parskats")
+def parskats():
+    """US-5: skaits pa statusiem un tēmām, vidējais apstrādes laiks (vadītājam)."""
+    if (atbilde := nav_pieejams("Pārskats", "vaditajs")):
+        return atbilde
+    db = get_db()
+    pa_statusiem = dict(db.execute("SELECT statuss, COUNT(*) FROM iesniegumi GROUP BY statuss").fetchall())
+    statusi = [(s, pa_statusiem.get(s, 0)) for s in STATUSI]
+
+    # Apstrādes laiks: no iesniegšanas līdz pēdējai statusa maiņai pabeigtam iesniegumam (Atbildēts / Noraidīts)
+    pa_temam = db.execute("""
+        SELECT t.nosaukums AS tema,
+               COUNT(i.id) AS skaits,
+               SUM(i.statuss IN ('Atbildēts', 'Noraidīts')) AS pabeigti,
+               AVG(CASE WHEN i.statuss IN ('Atbildēts', 'Noraidīts')
+                        THEN julianday((SELECT MAX(n.laiks) FROM notikumi n
+                                        WHERE n.iesnieguma_id = i.id AND n.veids = 'statuss'))
+                             - julianday(i.izveidots) END) AS vid_dienas
+        FROM temas t LEFT JOIN iesniegumi i ON i.temas_id = t.id
+        GROUP BY t.id ORDER BY t.id
+    """).fetchall()
+    kopa = sum(sk for _, sk in statusi)
+    pabeigti = sum(r["pabeigti"] or 0 for r in pa_temam)
+    vid = db.execute("""
+        SELECT AVG(julianday((SELECT MAX(n.laiks) FROM notikumi n WHERE n.iesnieguma_id = i.id AND n.veids = 'statuss'))
+                   - julianday(i.izveidots))
+        FROM iesniegumi i WHERE i.statuss IN ('Atbildēts', 'Noraidīts')
+    """).fetchone()[0]
+    maks = max((r["skaits"] for r in pa_temam), default=0) or 1
+    return render_template("parskats.html", statusi=statusi, pa_temam=pa_temam, kopa=kopa,
+                           pabeigti=pabeigti, vid=dienas(vid), dienas=dienas, maks=maks)
 
 
 @app.errorhandler(404)
