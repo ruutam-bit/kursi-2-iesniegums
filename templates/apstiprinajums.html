@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Iesniegums reģistrēts{% endblock %}
+{% block content %}
+<h1>Iesniegums reģistrēts</h1>
+
+<p class="pazinojums">Paldies! Jūsu iesniegumam piešķirts numurs <strong class="numurs">{{ i.numurs }}</strong>.</p>
+<p>Saglabājiet šo numuru: ar to varēsiet pārbaudīt iesnieguma statusu.</p>
+
+<dl class="detalas">
+  <dt>Numurs</dt><dd>{{ i.numurs }}</dd>
+  <dt>Tēma</dt><dd>{{ i.tema }}</dd>
+  <dt>Reģistrēts</dt><dd>{{ i.izveidots }}</dd>
+  <dt>Statuss</dt><dd><span class="statuss statuss-jauns">Jauns</span></dd>
+</dl>
+
+<h2>Kas notiks tālāk</h2>
+<ol>
+  <li>Pašvaldības darbinieks izskatīs iesniegumu un mainīs statusu uz «Apstrādē».</li>
+  <li>Atbildi nosūtīsim uz jūsu norādīto e-pastu.</li>
+  <li>Ja būs nepieciešama papildu informācija, sazināsimies ar jums.</li>
+</ol>
+
+<p><a href="{{ url_for('iesniegt') }}">Iesniegt vēl vienu iesniegumu</a></p>
+{% endblock %}

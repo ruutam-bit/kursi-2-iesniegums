@@ -57,9 +57,20 @@ def tuksa_forma(page):
     return None if ok else "Pēc kļūdas fokuss NAV uz kļūdu kopsavilkuma (3.3.1)"
 
 
+def apstiprinajums(page):
+    """Apstiprinājuma lapa (pēc POST → redirect; testa datos esošs numurs, lai neveidotu jaunus ierakstus)."""
+    page.goto(BASE_URL + "/apstiprinajums/2026-0001", wait_until="networkidle")
+
+
+def lapa_nav_atrasta(page):
+    page.goto(BASE_URL + "/apstiprinajums/nav-tada", wait_until="networkidle")
+
+
 # Stāvokļi, ko nevar sasniegt ar GET saitēm: (nosaukums, funkcija). Funkcija atgriež papildu kļūdu vai None.
 SCENARIJI = [
     ("Iesnieguma forma ar kļūdām (tukša forma)", tuksa_forma),
+    ("Apstiprinājums /apstiprinajums/2026-0001", apstiprinajums),
+    ("Lapa nav atrasta (404)", lapa_nav_atrasta),
 ]
 LOMAS = ["iedzivotajs", "darbinieks", "vaditajs"]
 

@@ -3,7 +3,7 @@ import os
 import re
 import sqlite3
 from datetime import datetime
-from flask import Flask, g, render_template, session, redirect, url_for, request, flash
+from flask import Flask, g, render_template, session, redirect, url_for, request, flash, abort
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
@@ -126,11 +126,27 @@ def iesniegt():
                 (cur.lastrowid, session.get("loma") or "iedzivotajs", "Iesniegums reģistrēts ar statusu «Jauns»."),
             )
             db.commit()
-            # Pagaidu risinājums līdz US-2 (apstiprinājuma lapa)
-            flash(f"Iesniegums reģistrēts. Numurs: {numurs}.")
-            return redirect(url_for("index"))
+            # POST → redirect → GET: F5 apstiprinājuma lapā neiesniedz atkārtoti (US-2)
+            return redirect(url_for("apstiprinajums", numurs=numurs))
 
     return render_template("iesniegt.html", temas=temas, dati=dati, kludas=kludas)
+
+
+@app.route("/apstiprinajums/<numurs>")
+def apstiprinajums(numurs):
+    """US-2: iesnieguma numurs un kas notiks tālāk. Personas datus nerāda (numuri ir secīgi)."""
+    iesniegums = get_db().execute(
+        "SELECT i.numurs, i.izveidots, t.nosaukums AS tema FROM iesniegumi i JOIN temas t ON t.id = i.temas_id "
+        "WHERE i.numurs = ?", (numurs,)
+    ).fetchone()
+    if iesniegums is None:
+        abort(404)
+    return render_template("apstiprinajums.html", i=iesniegums)
+
+
+@app.errorhandler(404)
+def nav_atrasts(_e):
+    return render_template("404.html"), 404
 
 
 @app.route("/pieklustamiba")

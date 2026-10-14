@@ -108,6 +108,12 @@ button.secondary { color: var(--akcents); background: #fff; }
 /* Statusa paziņojumi */
 [role="status"], .pazinojums { border: 2px solid var(--veiksme); padding: 0.75rem 1rem; margin: 1rem 0; }
 
+/* Apraksta saraksts (detaļas) */
+.detalas { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+.detalas dt { font-weight: 600; }
+.detalas dd { margin: 0; }
+.numurs { font-size: 1.25rem; }
+
 /* Tabulas */
 table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
 caption { text-align: left; font-weight: 600; padding: 0.5rem 0; }
