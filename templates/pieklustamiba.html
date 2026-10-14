@@ -2,26 +2,50 @@
 {% block title %}Piekļūstamības paziņojums{% endblock %}
 {% block content %}
 <h1>Piekļūstamības paziņojums</h1>
-<p class="muted">US-6: aizpildiet pēc testēšanas pēc veidnes <code>docs/PIEEJAMIBAS-PRASIBAS.md</code> (5. sadaļa).</p>
+
+{# Struktūra: docs/PIEEJAMIBAS-PRASIBAS.md 5. sadaļa (MK 445; ES paraugs — Īstenošanas lēmums (ES) 2018/1523).
+   Sadaļas ar «[Aizpilda pēc testēšanas]» aizpilda TIKAI ar reāliem testa rezultātiem. #}
+
+<p>Novada pašvaldība apņemas nodrošināt tīmekļvietnes «Iesniegumi» piekļūstamību saskaņā ar
+Ministru kabineta 2020. gada 14. jūlija noteikumiem Nr. 445 «Kārtība, kādā iestādes ievieto informāciju internetā».</p>
+<p>Paziņojums attiecas uz šīs vietnes visām lapām: iesniegšanas formu, statusa pārbaudi, darbinieku sarakstu un pārskatu.</p>
 
 <h2>Cik piekļūstama ir šī tīmekļvietne?</h2>
-<p>[Pilnībā atbilst / daļēji atbilst / neatbilst] Ministru kabineta 2020. gada 14. jūlija noteikumiem Nr. 445
-«Kārtība, kādā iestādes ievieto informāciju internetā» un standartam EN 301 549 (WCAG 2.1 AA).</p>
+<p class="aizpildit">[Aizpilda pēc testēšanas: pilnībā atbilst / daļēji atbilst / neatbilst]</p>
+<p>Atbilstība vērtēta pret standartu EN 301 549 V3.2.1 (WCAG 2.1 AA), ko prasa MK noteikumi Nr. 445.
+Papildus pārbaudītas WCAG 2.2 AA prasības, lai vietne būtu gatava standarta versijai V4.1.1.</p>
 
 <h2>Nepiekļūstamais saturs</h2>
+<p>Turpmāk minētais saturs vēl neatbilst prasībām:</p>
 <ul>
-  <li>[Atradums, kurā lapā, kāds WCAG kritērijs, kad plānots novērst]</li>
+  <li class="aizpildit">[Aizpilda pēc testēšanas: problēma — lapa — WCAG kritērijs — iemesls — plānotais novēršanas termiņš]</li>
 </ul>
 
 <h2>Piekļūstamības alternatīvas</h2>
-<p>[Kā saņemt saturu vai pakalpojumu citā veidā — tālrunis, e-pasts, klātiene]</p>
+<p>Ja kādu vietnes daļu nevarat izmantot, iesniegumu var iesniegt vai tā statusu uzzināt arī citādi:</p>
+<ul>
+  <li>pa tālruni <a href="tel:+37160000000">60 000 000</a> darba dienās 8.00–17.00;</li>
+  <li>pa e-pastu <a href="mailto:pasvaldiba@example.lv">pasvaldiba@example.lv</a>;</li>
+  <li>klātienē Novada pašvaldībā, Brīvības ielā 1.</li>
+</ul>
 
 <h2>Atsauksmēm un saziņai</h2>
-<p>[E-pasts, tālrunis, atbildes termiņš]</p>
+<p>Ja pamanāt piekļūstamības problēmu vai vēlaties saņemt saturu citā formātā, rakstiet uz
+<a href="mailto:pasvaldiba@example.lv">pasvaldiba@example.lv</a> vai zvaniet <a href="tel:+37160000000">60 000 000</a>.
+Atbildēsim viena mēneša laikā.</p>
 
 <h2>Sūdzību iesniegšana</h2>
-<p>[Pārraugošā iestāde; ja sūdzība netiek izskatīta — Tiesībsargs]</p>
+<p>Ja atbildi nesaņemat vai tā jūs neapmierina, varat vērsties pie iestādes, kas uzrauga tīmekļvietņu piekļūstamību
+<span class="aizpildit">[pārbaudīt: Viedās administrācijas un reģionālās attīstības ministrija]</span>.
+Ja jūsu sūdzība netiek izskatīta, varat vērsties pie Tiesībsarga.</p>
 
 <h2>Ziņas par paziņojuma sagatavošanu</h2>
-<p>[Datums, izvērtējuma metode (pašnovērtējums pēc VARAM vadlīnijām / automātiskie rīki / ekspertu tests), kas apstiprināja]</p>
+<dl class="detalas">
+  <dt>Sagatavots</dt><dd class="aizpildit">[Aizpilda pēc testēšanas: datums]</dd>
+  <dt>Metode</dt><dd class="aizpildit">[Aizpilda pēc testēšanas: pašnovērtējums pēc VARAM vadlīnijām; automātiskais tests (axe-core); manuālā pārbaude ar tastatūru un ekrānlasītāju]</dd>
+  <dt>Apstiprināja</dt><dd class="aizpildit">[Aizpilda pēc testēšanas: vārds, amats]</dd>
+  <dt>Pārskatīts</dt><dd class="aizpildit">[Aizpilda pēc testēšanas: pārskata vismaz reizi gadā un pēc būtiskām izmaiņām]</dd>
+</dl>
+
+<p class="palidziba">Mācību prototips: kontaktinformācija ir izdomāta.</p>
 {% endblock %}

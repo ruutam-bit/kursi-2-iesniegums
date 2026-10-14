@@ -174,3 +174,6 @@ tfoot th, tfoot td { font-weight: 700; }
   .josla-rinda { grid-template-columns: minmax(0, 1fr) 2.5rem; }
   .josla-nosaukums { grid-column: 1 / -1; }
 }
+
+/* Vēl neaizpildīts paziņojuma saturs — redzami atzīmēts (ne tikai krāsā: teksts kvadrātiekavās) */
+.aizpildit { background: #fff4ce; outline: 1px dashed #7a4e00; }
