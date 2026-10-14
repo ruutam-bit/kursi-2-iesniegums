@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{% if kludas %}Kļūda: {% endif %}Iesniegt iesniegumu{% endblock %}
+
+{# Atribūti laukam: saista palīgtekstu un kļūdu (1.3.1, 3.3.1) #}
+{% macro apraksts_ids(lauks, ir_palidziba=false) -%}
+  {%- set ids = [] -%}
+  {%- if ir_palidziba %}{% set _ = ids.append(lauks ~ '-palidziba') %}{% endif -%}
+  {%- if kludas[lauks] %}{% set _ = ids.append(lauks ~ '-kluda') %}{% endif -%}
+  {%- if ids %} aria-describedby="{{ ids|join(' ') }}"{% endif -%}
+  {%- if kludas[lauks] %} aria-invalid="true"{% endif -%}
+{%- endmacro %}
+
+{% macro kluda(lauks) -%}
+  {% if kludas[lauks] %}<p class="kluda-teksts" id="{{ lauks }}-kluda"><span class="visually-hidden">Kļūda: </span>{{ kludas[lauks] }}</p>{% endif %}
+{%- endmacro %}
+
+{% block content %}
+<h1>Iesniegt iesniegumu</h1>
+
+{% if kludas %}
+{# Kļūdu kopsavilkums: saņem fokusu pēc ielādes bez JS (autofocus), saites ved uz laukiem (3.3.1) #}
+<div class="kludu-kopsavilkums" role="alert" tabindex="-1" autofocus aria-labelledby="kludu-virsraksts">
+  <h2 id="kludu-virsraksts">Iesniegumu nevar nosūtīt: {{ kludas|length }} {{ 'kļūda' if kludas|length == 1 else 'kļūdas' }}</h2>
+  <ul>
+    {% for lauks, zina in kludas.items() %}
+    <li><a href="#{{ lauks }}">{{ zina }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<p>Aizpildiet formu, un pašvaldība reģistrēs jūsu iesniegumu. Pēc nosūtīšanas saņemsiet iesnieguma numuru, ar kuru varēsiet pārbaudīt statusu.</p>
+<p>Lauki ar norādi «(obligāts)» jāaizpilda. Laika ierobežojuma nav.</p>
+
+<form method="post" action="{{ url_for('iesniegt') }}" novalidate>
+  <label for="vards">Vārds, uzvārds (obligāts)</label>
+  {{ kluda('vards') }}
+  <input type="text" id="vards" name="vards" value="{{ dati.vards }}" autocomplete="name"{{ apraksts_ids('vards') }}>
+
+  <label for="epasts">E-pasts (obligāts)</label>
+  <p class="palidziba" id="epasts-palidziba">Uz šo adresi sūtīsim atbildi. To redz tikai pašvaldības darbinieki.</p>
+  {{ kluda('epasts') }}
+  <input type="email" id="epasts" name="epasts" value="{{ dati.epasts }}" autocomplete="email"{{ apraksts_ids('epasts', true) }}>
+
+  <label for="temas_id">Tēma (obligāts)</label>
+  {{ kluda('temas_id') }}
+  <select id="temas_id" name="temas_id"{{ apraksts_ids('temas_id') }}>
+    <option value="">— izvēlieties tēmu —</option>
+    {% for t in temas %}
+    <option value="{{ t.id }}" {% if dati.temas_id == t.id|string %}selected{% endif %}>{{ t.nosaukums }}{% if t.apraksts %} ({{ t.apraksts }}){% endif %}</option>
+    {% endfor %}
+  </select>
+
+  <label for="adrese">Adrese vai vieta</label>
+  <p class="palidziba" id="adrese-palidziba">Piemēram, «Liepu iela 3» vai «pie autobusa pieturas Parks».</p>
+  {{ kluda('adrese') }}
+  <input type="text" id="adrese" name="adrese" value="{{ dati.adrese }}" autocomplete="street-address"{{ apraksts_ids('adrese', true) }}>
+
+  <label for="apraksts">Apraksts (obligāts)</label>
+  <p class="palidziba" id="apraksts-palidziba">Kas noticis un kur? Vismaz 10 rakstzīmes.</p>
+  {{ kluda('apraksts') }}
+  <textarea id="apraksts" name="apraksts" rows="6"{{ apraksts_ids('apraksts', true) }}>{{ dati.apraksts }}</textarea>
+
+  <fieldset>
+    <legend>Datu apstrāde (obligāts)</legend>
+    <p class="palidziba" id="piekrisana-palidziba">Pašvaldība izmanto jūsu vārdu un e-pastu tikai, lai izskatītu šo iesniegumu un atbildētu uz to.</p>
+    {{ kluda('piekrisana') }}
+    <div class="radio">
+      <input type="checkbox" id="piekrisana" name="piekrisana" value="jā" {% if dati.piekrisana %}checked{% endif %}{{ apraksts_ids('piekrisana', true) }}>
+      <label for="piekrisana">Piekrītu, ka mani dati tiek apstrādāti iesnieguma izskatīšanai</label>
+    </div>
+  </fieldset>
+
+  <button type="submit">Nosūtīt iesniegumu</button>
+</form>
+{% endblock %}

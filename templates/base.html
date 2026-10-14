@@ -13,14 +13,18 @@
     <p class="brand"><a href="{{ url_for('index') }}">Iesniegumi</a> <span class="muted">· Novada pašvaldība</span></p>
     <nav aria-label="Galvenā izvēlne">
       <ul>
-        <li><a href="{{ url_for('index') }}">Sākums</a></li>
-        {# Pievienojiet saites, kad ekrāni ir gatavi: Iesniegt, Mans iesniegums, Saraksts, Pārskats #}
+        {% for endpoint, teksts in izvelne %}
+        <li><a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>{{ teksts }}</a></li>
+        {% endfor %}
       </ul>
     </nav>
     {% if lomas_nosaukums %}<p class="muted">Loma: {{ lomas_nosaukums }}</p>{% endif %}
   </header>
 
   <main id="saturs" tabindex="-1">
+    {% for zina in get_flashed_messages() %}
+    <p role="status" class="pazinojums">{{ zina }}</p>
+    {% endfor %}
     {% block content %}{% endblock %}
   </main>
 
