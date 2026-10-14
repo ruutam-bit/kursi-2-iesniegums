@@ -144,7 +144,7 @@ th[scope="row"] { font-weight: 400; background: transparent; }
 
 /* MI ieteikuma bloks — skaidri nodalīts un marķēts */
 .mi-bloks { border: 2px dashed var(--mala); padding: 1rem; margin: 1rem 0; background: #f7f7f7; }
-.mi-bloks .marks { font-weight: 700; }
+.marks { font-weight: 700; }
 
 /* Reflow: 320 px platumā nekas neizlec ārā (1.4.10) */
 @media (max-width: 40rem) {
@@ -177,3 +177,6 @@ tfoot th, tfoot td { font-weight: 700; }
 
 /* Vēl neaizpildīts paziņojuma saturs — redzami atzīmēts (ne tikai krāsā: teksts kvadrātiekavās) */
 .aizpildit { background: #fff4ce; outline: 1px dashed #7a4e00; }
+.mi-bloks h2 { margin-top: 0; }
+.mi-projekts { background: #fff; border-left: 4px solid var(--mala); padding: 0.5rem 0.75rem; }
+.pogu-rinda { display: flex; flex-wrap: wrap; gap: 0 1rem; }

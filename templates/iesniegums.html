@@ -36,6 +36,33 @@
   </dl>
 </section>
 
+<section class="mi-bloks" id="mi-ieteikums" tabindex="-1" aria-labelledby="mi-virsraksts mi-marks">
+  <h2 id="mi-virsraksts">MI ieteikums</h2>
+  <p class="marks" id="mi-marks">Ģenerēts ar MI – pārbaudiet pirms lietošanas</p>
+  {% for zina in get_flashed_messages(category_filter=['mi']) %}<p role="status" class="pazinojums">{{ zina }}</p>{% endfor %}
+  {% if not mi_ieslegts %}
+  <p>MI ieteikumi šobrīd ir izslēgti. Apstrādājiet iesniegumu kā parasti.</p>
+  {% elif not mi %}
+  <p>MI var ieteikt tēmu un sagatavot atbildes projektu. Projekts netiek saglabāts vai nosūtīts automātiski — jūs to pārbaudāt un rediģējat.</p>
+  <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
+    <button type="submit" name="darbiba" value="mi_ieteikums">Saņemt MI ieteikumu</button>
+  </form>
+  {% else %}
+  <dl class="detalas">
+    <dt>Ieteiktā tēma</dt>
+    <dd>{{ mi.tema }} {% if mi.tema == i.tema %}(sakrīt ar pašreizējo){% else %}(pašreizējā: {{ i.tema }}){% endif %}</dd>
+    <dt>Avots</dt>
+    <dd>{% if mi.avots == 'imitacija' %}atslēgvārdu imitācija (bez tīkla){% else %}valodas modelis {{ mi.avots[3:] }}{% endif %}</dd>
+  </dl>
+  <h3>Atbildes projekts</h3>
+  <p class="teksts-ar-rindam mi-projekts">{{ mi.atbildes_projekts }}</p>
+  <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}" class="pogu-rinda">
+    <button type="submit" name="darbiba" value="mi_izmantot">Izmantot projektu atbildes laukā</button>
+    <button type="submit" name="darbiba" value="mi_ieteikums" class="secondary">Saņemt jaunu ieteikumu</button>
+  </form>
+  {% endif %}
+</section>
+
 <section aria-labelledby="statuss-virsraksts">
   <h2 id="statuss-virsraksts">Mainīt statusu</h2>
   <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
@@ -51,10 +78,13 @@
 <section aria-labelledby="atbilde-virsraksts">
   <h2 id="atbilde-virsraksts">Atbilde iedzīvotājam</h2>
   <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
+    {% for zina in get_flashed_messages(category_filter=['mi-atbilde']) %}<p role="status" class="pazinojums">{{ zina }}</p>{% endfor %}
     <label for="atbilde">Atbildes teksts</label>
     <p class="palidziba" id="atbilde-palidziba">Atbildi iedzīvotājs redzēs, kad statuss būs «Atbildēts».</p>
+    {% set no_mi = mi and mi.izmantots %}
+    {% if no_mi %}<p class="marks" id="atbilde-mi">Teksts ievietots no MI projekta. Ģenerēts ar MI – pārbaudiet pirms lietošanas. Atbilde vēl nav saglabāta.</p>{% endif %}
     {{ kluda('atbilde') }}
-    <textarea id="atbilde" name="atbilde" rows="6" aria-describedby="atbilde-palidziba{% if kludas.atbilde %} atbilde-kluda{% endif %}"{% if kludas.atbilde %} aria-invalid="true"{% endif %}>{{ ievade.atbilde }}</textarea>
+    <textarea id="atbilde" name="atbilde" rows="6" aria-describedby="atbilde-palidziba{% if no_mi %} atbilde-mi{% endif %}{% if kludas.atbilde %} atbilde-kluda{% endif %}"{% if kludas.atbilde %} aria-invalid="true"{% endif %}>{{ ievade.atbilde }}</textarea>
     <button type="submit" name="darbiba" value="atbilde">Saglabāt atbildi</button>
   </form>
 </section>

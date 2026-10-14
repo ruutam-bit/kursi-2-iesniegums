@@ -5,6 +5,8 @@ import sqlite3
 from datetime import datetime
 from flask import Flask, g, render_template, session, redirect, url_for, request, flash, abort
 
+import ai
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
 SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "schema.sql")
 
@@ -26,6 +28,9 @@ STATUSI = ["Jauns", "Apstrādē", "Atbildēts", "Noraidīts"]
 # CSS klase statusa nozīmītei; statuss vienmēr arī tekstā (1.4.1)
 STATUSA_KLASE = {"Jauns": "statuss-jauns", "Apstrādē": "statuss-apstrade",
                  "Atbildēts": "statuss-atbildets", "Noraidīts": "statuss-noraidits"}
+
+# MI ieteikumu var izslēgt (cilvēka uzraudzība): MI_IZSLEGTS=1
+MI_IESLEGTS = os.environ.get("MI_IZSLEGTS") != "1"
 
 EPASTS_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -242,17 +247,49 @@ def iesniegums(numurs):
             else:
                 db.execute("UPDATE iesniegumi SET atbilde = ? WHERE id = ?", (ievade["atbilde"], i["id"]))
                 pierakstit(db, i["id"], "atbilde", ievade["atbilde"])
+                mi = session.get("mi")
+                if mi and mi["numurs"] == numurs and mi.get("izmantots"):
+                    # Mašīnlasāma izcelsme: atbilde balstīta uz MI projektu, cilvēks to pārskatīja un saglabāja
+                    pierakstit(db, i["id"], "mi_ieteikums",
+                               f"Saglabātā atbilde balstīta uz MI projektu (avots: {mi['avots']}); darbinieks to pārskatīja.")
+                    session.pop("mi")
                 db.commit()
                 flash("Atbilde saglabāta. Lai to nosūtītu iedzīvotājam, mainiet statusu uz «Atbildēts».")
                 return redirect(url_for("iesniegums", numurs=numurs))
+        elif darbiba in ("mi_ieteikums", "mi_izmantot") and MI_IESLEGTS:
+            if darbiba == "mi_ieteikums":
+                rez = ai.ieteikums(i["apraksts"])
+                session["mi"] = {"numurs": numurs, **rez}
+                pierakstit(db, i["id"], "mi_ieteikums",
+                           f"MI ieteikums sagatavots (avots: {rez['avots']}); ieteiktā tēma: «{rez['tema']}».")
+                flash("MI ieteikums sagatavots. Pārbaudiet to pirms lietošanas.", "mi")
+            else:
+                mi = session.get("mi")
+                if not mi or mi["numurs"] != numurs:
+                    abort(400)
+                session["mi"] = {**mi, "izmantots": True}
+                pierakstit(db, i["id"], "mi_ieteikums",
+                           f"MI atbildes projekts ievietots atbildes laukā rediģēšanai (avots: {mi['avots']}). Nav saglabāts.")
+                flash("MI projekts ievietots atbildes laukā. Pārbaudiet un rediģējiet to, tad saglabājiet.", "mi-atbilde")
+            db.commit()
+            # Fragments aizved lietotāju atpakaļ pie bloka, ar kuru viņš strādāja (2.4.3)
+            enkurs = "mi-ieteikums" if darbiba == "mi_ieteikums" else "atbilde"
+            return redirect(url_for("iesniegums", numurs=numurs, _anchor=enkurs))
         else:
             abort(400)
+
+    mi = session.get("mi")
+    if not mi or mi["numurs"] != numurs:
+        mi = None
+    # MI projekts nonāk rediģējamā laukā, bet netiek saglabāts, kamēr darbinieks nenospiež «Saglabāt atbildi»
+    if mi and mi.get("izmantots") and request.method == "GET":
+        ievade["atbilde"] = mi["atbildes_projekts"]
 
     vesture = db.execute(
         "SELECT laiks, veids, loma, teksts FROM notikumi WHERE iesnieguma_id = ? ORDER BY laiks, id", (i["id"],)
     ).fetchall()
     return render_template("iesniegums.html", i=i, vesture=vesture, statusi=STATUSI, kludas=kludas,
-                           ievade=ievade), (400 if kludas else 200)
+                           ievade=ievade, mi=mi, mi_ieslegts=MI_IESLEGTS), (400 if kludas else 200)
 
 
 def dienas(vertiba):

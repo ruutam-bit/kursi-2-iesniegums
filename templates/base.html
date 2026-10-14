@@ -22,7 +22,7 @@
   </header>
 
   <main id="saturs" tabindex="-1">
-    {% for zina in get_flashed_messages() %}
+    {% for zina in get_flashed_messages(category_filter=['message']) %}
     <p role="status" class="pazinojums">{{ zina }}</p>
     {% endfor %}
     {% block content %}{% endblock %}
