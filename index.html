@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Sākums{% endblock %}
+{% block content %}
+<h1>Iesniegumi novada pašvaldībai</h1>
+<p>Iesniedziet iesniegumu par ielām, apgaismojumu, atkritumiem vai citiem jautājumiem un sekojiet tā statusam.</p>
+
+<section aria-labelledby="loma-virsraksts">
+  <h2 id="loma-virsraksts">Izvēlieties lomu</h2>
+  <form method="post" action="{{ url_for('izveleties_lomu') }}">
+    <fieldset>
+      <legend>Kā vēlaties lietot sistēmu? (mācību režīms, bez pieteikšanās)</legend>
+      {% for kods, nosaukums in LOMAS.items() %}
+      <div class="radio">
+        <input type="radio" id="loma-{{ kods }}" name="loma" value="{{ kods }}" {% if loma == kods %}checked{% endif %}>
+        <label for="loma-{{ kods }}">{{ nosaukums }}</label>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <button type="submit">Turpināt</button>
+  </form>
+</section>
+
+<section aria-labelledby="temas-virsraksts">
+  <h2 id="temas-virsraksts">Iesniegumu tēmas</h2>
+  <ul>
+    {% for t in temas %}<li>{{ t.nosaukums }}</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

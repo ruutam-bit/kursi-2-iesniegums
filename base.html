@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Sākums{% endblock %} – Iesniegumi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#saturs">Pāriet uz saturu</a>
+
+  <header class="site-header">
+    <p class="brand"><a href="{{ url_for('index') }}">Iesniegumi</a> <span class="muted">· Novada pašvaldība</span></p>
+    <nav aria-label="Galvenā izvēlne">
+      <ul>
+        <li><a href="{{ url_for('index') }}">Sākums</a></li>
+        {# Pievienojiet saites, kad ekrāni ir gatavi: Iesniegt, Mans iesniegums, Saraksts, Pārskats #}
+      </ul>
+    </nav>
+    {% if lomas_nosaukums %}<p class="muted">Loma: {{ lomas_nosaukums }}</p>{% endif %}
+  </header>
+
+  <main id="saturs" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>Mācību prototips · <a href="{{ url_for('pieklustamiba') }}">Piekļūstamības paziņojums</a></p>
+  </footer>
+</body>
+</html>

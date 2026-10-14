@@ -1,0 +1,27 @@
+{
+  "name": "Iesniegumi (Flask + SQLite + Claude Code)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+  "postCreateCommand": "pip install -r requirements.txt && python -m playwright install --with-deps chromium && npm install -g @anthropic-ai/claude-code",
+  "forwardPorts": [5000],
+  "portsAttributes": {
+    "5000": { "label": "Iesniegumi (Flask)", "onAutoForward": "openPreview" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "anthropic.claude-code",
+        "deque-systems.vscode-axe-linter"
+      ],
+      "settings": {
+        "editor.formatOnSave": false
+      }
+    }
+  },
+  "remoteEnv": {
+    "FLASK_DEBUG": "1"
+  }
+}

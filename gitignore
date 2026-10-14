@@ -1,0 +1,4 @@
+data.db
+__pycache__/
+a11y-report.md
+.env
