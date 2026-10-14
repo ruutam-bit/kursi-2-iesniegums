@@ -48,6 +48,9 @@ body {
 .brand { margin: 0; font-weight: 700; font-size: 1.25rem; }
 .site-header nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
 .site-footer { border-top: 1px solid var(--mala); margin-top: 2rem; }
+.footer-virsraksts { font-size: 1.125rem; margin: 0.5rem 0; }
+.kontakti { margin: 0; padding-left: 1.25rem; }
+.kontakti li { margin: 0.25rem 0; }
 .muted { color: #595959; }   /* 7:1 uz balta */
 
 a { color: var(--akcents); }
