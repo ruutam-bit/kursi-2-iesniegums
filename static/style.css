@@ -109,9 +109,13 @@ button.secondary { color: var(--akcents); background: #fff; }
 [role="status"], .pazinojums { border: 2px solid var(--veiksme); padding: 0.75rem 1rem; margin: 1rem 0; }
 
 /* Apraksta saraksts (detaļas) */
-.detalas { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+.detalas { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.25rem 1rem; }
 .detalas dt { font-weight: 600; }
-.detalas dd { margin: 0; }
+.detalas dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 30rem) {
+  .detalas { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .detalas dd { margin-bottom: 0.5rem; }
+}
 .numurs { font-size: 1.25rem; }
 
 /* Tabulas */
@@ -150,3 +154,10 @@ th[scope="row"] { font-weight: 400; background: transparent; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Detaļu lapa */
+.teksts-ar-rindam { white-space: pre-line; }
+.vesture { padding-left: 1.5rem; }
+.vesture li { margin: 0.75rem 0; }
+.vesture p { margin: 0.25rem 0 0; }
+section + section { margin-top: 2rem; }

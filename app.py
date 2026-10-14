@@ -190,6 +190,70 @@ def saraksts():
                            filtrs=filtrs, ir_filtrs=ir_filtrs)
 
 
+def pierakstit(db, iesnieguma_id, veids, teksts):
+    """Notikums vēsturē (statusa maiņa, komentārs, atbilde) ar lietotāja lomu."""
+    db.execute("INSERT INTO notikumi (iesnieguma_id, veids, loma, teksts) VALUES (?, ?, ?, ?)",
+               (iesnieguma_id, veids, session.get("loma"), teksts))
+    db.execute("UPDATE iesniegumi SET atjaunots = datetime('now', 'localtime') WHERE id = ?", (iesnieguma_id,))
+
+
+@app.route("/iesniegums/<numurs>", methods=["GET", "POST"])
+def iesniegums(numurs):
+    """US-4: detaļas, statusa maiņa, komentārs, atbilde un vēsture (darbiniekam)."""
+    if (atbilde := nav_pieejams("Iesnieguma detaļas", "darbinieks")):
+        return atbilde
+    db = get_db()
+    i = db.execute(
+        "SELECT i.*, t.nosaukums AS tema FROM iesniegumi i JOIN temas t ON t.id = i.temas_id WHERE i.numurs = ?",
+        (numurs,),
+    ).fetchone()
+    if i is None:
+        abort(404)
+
+    kludas, ievade = {}, {"komentars": "", "atbilde": i["atbilde"] or ""}
+    if request.method == "POST":
+        darbiba = request.form.get("darbiba")
+        if darbiba == "statuss":
+            jauns = request.form.get("statuss", "")
+            if jauns not in STATUSI or jauns == i["statuss"]:
+                kludas["statuss"] = f"Izvēlieties statusu, kas atšķiras no pašreizējā «{i['statuss']}»."
+            elif jauns == "Atbildēts" and not i["atbilde"]:
+                kludas["statuss"] = "Lai mainītu statusu uz «Atbildēts», vispirms saglabājiet atbildi iedzīvotājam."
+            else:
+                db.execute("UPDATE iesniegumi SET statuss = ? WHERE id = ?", (jauns, i["id"]))
+                pierakstit(db, i["id"], "statuss", f"Statuss mainīts no «{i['statuss']}» uz «{jauns}».")
+                db.commit()
+                flash(f"Statuss mainīts uz «{jauns}».")
+                return redirect(url_for("iesniegums", numurs=numurs))
+        elif darbiba == "komentars":
+            ievade["komentars"] = request.form.get("komentars", "").strip()
+            if not ievade["komentars"]:
+                kludas["komentars"] = "Ierakstiet komentāra tekstu."
+            else:
+                pierakstit(db, i["id"], "komentars", ievade["komentars"])
+                db.commit()
+                flash("Komentārs pievienots vēsturei.")
+                return redirect(url_for("iesniegums", numurs=numurs))
+        elif darbiba == "atbilde":
+            ievade["atbilde"] = request.form.get("atbilde", "").strip()
+            if len(ievade["atbilde"]) < 10:
+                kludas["atbilde"] = "Uzrakstiet atbildi iedzīvotājam — vismaz 10 rakstzīmes."
+            else:
+                db.execute("UPDATE iesniegumi SET atbilde = ? WHERE id = ?", (ievade["atbilde"], i["id"]))
+                pierakstit(db, i["id"], "atbilde", ievade["atbilde"])
+                db.commit()
+                flash("Atbilde saglabāta. Lai to nosūtītu iedzīvotājam, mainiet statusu uz «Atbildēts».")
+                return redirect(url_for("iesniegums", numurs=numurs))
+        else:
+            abort(400)
+
+    vesture = db.execute(
+        "SELECT laiks, veids, loma, teksts FROM notikumi WHERE iesnieguma_id = ? ORDER BY laiks, id", (i["id"],)
+    ).fetchall()
+    return render_template("iesniegums.html", i=i, vesture=vesture, statusi=STATUSI, kludas=kludas,
+                           ievade=ievade), (400 if kludas else 200)
+
+
 @app.errorhandler(404)
 def nav_atrasts(_e):
     return render_template("404.html"), 404

@@ -72,12 +72,24 @@ def nav_pieejams(page):
     page.goto(BASE_URL + "/saraksts", wait_until="networkidle")
 
 
+def detalas_ar_kludu(page):
+    """Darbinieks mēģina «Atbildēts» bez atbildes → kļūda (DB nemainās). Pārbauda fokusu uz kopsavilkumu."""
+    izveleties_lomu(page, "darbinieks")
+    page.goto(BASE_URL + "/iesniegums/2026-0006", wait_until="domcontentloaded")
+    page.select_option("#statuss", "Atbildēts")
+    page.click("button[value=statuss]")
+    page.wait_for_load_state("networkidle")
+    ok = page.evaluate("document.activeElement && document.activeElement.classList.contains('kludu-kopsavilkums')")
+    return None if ok else "Detaļās pēc kļūdas fokuss NAV uz kļūdu kopsavilkuma (3.3.1)"
+
+
 # Stāvokļi, ko nevar sasniegt ar GET saitēm: (nosaukums, funkcija). Funkcija atgriež papildu kļūdu vai None.
 SCENARIJI = [
     ("Iesnieguma forma ar kļūdām (tukša forma)", tuksa_forma),
     ("Apstiprinājums /apstiprinajums/2026-0001", apstiprinajums),
     ("Lapa nav atrasta (404)", lapa_nav_atrasta),
     ("Lapa nav pieejama šai lomai (403)", nav_pieejams),
+    ("Iesnieguma detaļas ar kļūdu", detalas_ar_kludu),
 ]
 LOMAS = ["iedzivotajs", "darbinieks", "vaditajs"]
 

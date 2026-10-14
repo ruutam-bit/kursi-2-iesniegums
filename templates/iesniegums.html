@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{% if kludas %}Kļūda: {% endif %}Iesniegums {{ i.numurs }}{% endblock %}
+
+{% macro lauka_attr(lauks) -%}
+  {%- if kludas[lauks] %} aria-describedby="{{ lauks }}-kluda" aria-invalid="true"{% endif -%}
+{%- endmacro %}
+{% macro kluda(lauks) -%}
+  {% if kludas[lauks] %}<p class="kluda-teksts" id="{{ lauks }}-kluda"><span class="visually-hidden">Kļūda: </span>{{ kludas[lauks] }}</p>{% endif %}
+{%- endmacro %}
+
+{% block content %}
+<h1>Iesniegums {{ i.numurs }}</h1>
+
+{% if kludas %}
+<div class="kludu-kopsavilkums" role="alert" tabindex="-1" autofocus aria-labelledby="kludu-virsraksts">
+  <h2 id="kludu-virsraksts">Darbību nevar izpildīt</h2>
+  <ul>
+    {% for lauks, zina in kludas.items() %}<li><a href="#{{ lauks }}">{{ zina }}</a></li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<p><a href="{{ url_for('saraksts') }}">Atpakaļ uz iesniegumu sarakstu</a></p>
+
+<section aria-labelledby="dati-virsraksts">
+  <h2 id="dati-virsraksts">Iesnieguma dati</h2>
+  <dl class="detalas">
+    <dt>Statuss</dt><dd><span class="statuss {{ STATUSA_KLASE[i.statuss] }}">{{ i.statuss }}</span></dd>
+    <dt>Iesniegts</dt><dd>{{ i.izveidots }}</dd>
+    <dt>Pēdējās izmaiņas</dt><dd>{{ i.atjaunots }}</dd>
+    <dt>Tēma</dt><dd>{{ i.tema }}</dd>
+    <dt>Iesniedzējs</dt><dd>{{ i.vards }}</dd>
+    <dt>E-pasts</dt><dd>{{ i.epasts }}</dd>
+    <dt>Adrese vai vieta</dt><dd>{{ i.adrese or 'nav norādīta' }}</dd>
+    <dt>Apraksts</dt><dd class="teksts-ar-rindam">{{ i.apraksts }}</dd>
+  </dl>
+</section>
+
+<section aria-labelledby="statuss-virsraksts">
+  <h2 id="statuss-virsraksts">Mainīt statusu</h2>
+  <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
+    <label for="statuss">Jaunais statuss</label>
+    {{ kluda('statuss') }}
+    <select id="statuss" name="statuss"{{ lauka_attr('statuss') }}>
+      {% for s in statusi %}<option value="{{ s }}" {% if s == i.statuss %}selected{% endif %}>{{ s }}{% if s == i.statuss %} (pašreizējais){% endif %}</option>{% endfor %}
+    </select>
+    <button type="submit" name="darbiba" value="statuss">Saglabāt statusu</button>
+  </form>
+</section>
+
+<section aria-labelledby="atbilde-virsraksts">
+  <h2 id="atbilde-virsraksts">Atbilde iedzīvotājam</h2>
+  <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
+    <label for="atbilde">Atbildes teksts</label>
+    <p class="palidziba" id="atbilde-palidziba">Atbildi iedzīvotājs redzēs, kad statuss būs «Atbildēts».</p>
+    {{ kluda('atbilde') }}
+    <textarea id="atbilde" name="atbilde" rows="6" aria-describedby="atbilde-palidziba{% if kludas.atbilde %} atbilde-kluda{% endif %}"{% if kludas.atbilde %} aria-invalid="true"{% endif %}>{{ ievade.atbilde }}</textarea>
+    <button type="submit" name="darbiba" value="atbilde">Saglabāt atbildi</button>
+  </form>
+</section>
+
+<section aria-labelledby="komentars-virsraksts">
+  <h2 id="komentars-virsraksts">Pievienot komentāru</h2>
+  <form method="post" action="{{ url_for('iesniegums', numurs=i.numurs) }}">
+    <label for="komentars">Komentārs (redz tikai darbinieki)</label>
+    {{ kluda('komentars') }}
+    <textarea id="komentars" name="komentars" rows="3"{{ lauka_attr('komentars') }}>{{ ievade.komentars }}</textarea>
+    <button type="submit" name="darbiba" value="komentars">Pievienot komentāru</button>
+  </form>
+</section>
+
+<section aria-labelledby="vesture-virsraksts">
+  <h2 id="vesture-virsraksts">Vēsture</h2>
+  <ol class="vesture">
+    {% for n in vesture %}
+    <li>
+      <time datetime="{{ n.laiks|replace(' ', 'T') }}">{{ n.laiks }}</time> ·
+      {{ {'statuss': 'Statuss', 'komentars': 'Komentārs', 'atbilde': 'Atbilde', 'mi_ieteikums': 'MI ieteikums'}.get(n.veids, n.veids) }} ·
+      {{ LOMAS.get(n.loma, 'Sistēma') }}
+      <p class="teksts-ar-rindam">{{ n.teksts }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

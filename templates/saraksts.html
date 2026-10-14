@@ -50,7 +50,7 @@
   <tbody>
     {% for i in iesniegumi %}
     <tr>
-      <th scope="row"><a href="/iesniegums/{{ i.numurs }}">Iesniegums {{ i.numurs }}</a></th>
+      <th scope="row"><a href="{{ url_for('iesniegums', numurs=i.numurs) }}">Iesniegums {{ i.numurs }}</a></th>
       <td>{{ i.izveidots }}</td>
       <td>{{ i.tema }}</td>
       <td>{{ i.vards }}</td>
