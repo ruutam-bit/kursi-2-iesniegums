@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ lapa }}: nav pieejams{% endblock %}
+{% block content %}
+<h1>{{ lapa }}</h1>
+<p>Šī lapa pieejama lomai «{{ vajadzigas }}». {% if lomas_nosaukums %}Jūsu pašreizējā loma: «{{ lomas_nosaukums|lower }}».{% else %}Jūs vēl neesat izvēlējies lomu.{% endif %}</p>
+<p><a href="{{ url_for('index') }}">Izvēlēties lomu sākumlapā</a></p>
+{% endblock %}

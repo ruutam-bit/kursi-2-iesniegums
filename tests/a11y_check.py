@@ -66,11 +66,18 @@ def lapa_nav_atrasta(page):
     page.goto(BASE_URL + "/apstiprinajums/nav-tada", wait_until="networkidle")
 
 
+def nav_pieejams(page):
+    """Lapa citai lomai: vadītājs atver darbinieka sarakstu → paskaidrojums (403)."""
+    izveleties_lomu(page, "vaditajs")
+    page.goto(BASE_URL + "/saraksts", wait_until="networkidle")
+
+
 # Stāvokļi, ko nevar sasniegt ar GET saitēm: (nosaukums, funkcija). Funkcija atgriež papildu kļūdu vai None.
 SCENARIJI = [
     ("Iesnieguma forma ar kļūdām (tukša forma)", tuksa_forma),
     ("Apstiprinājums /apstiprinajums/2026-0001", apstiprinajums),
     ("Lapa nav atrasta (404)", lapa_nav_atrasta),
+    ("Lapa nav pieejama šai lomai (403)", nav_pieejams),
 ]
 LOMAS = ["iedzivotajs", "darbinieks", "vaditajs"]
 

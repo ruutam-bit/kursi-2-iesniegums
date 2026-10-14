@@ -120,6 +120,17 @@ caption { text-align: left; font-weight: 600; padding: 0.5rem 0; }
 th, td { border: 1px solid var(--mala); padding: 0.5rem; text-align: left; vertical-align: top; }
 th { background: #f0f0f0; }
 
+/* Tabula šaurā ekrānā ritinās horizontāli savā apgabalā — tabulas semantika saglabājas (1.4.10) */
+.tabulas-ietvars { overflow-x: auto; margin: 1rem 0; }
+.tabulas-ietvars table { margin: 0; min-width: 36rem; }
+th[scope="row"] { font-weight: 400; background: transparent; }
+
+/* Filtri */
+.filtri-lauki { display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
+.filtri-lauki > div { flex: 1 1 12rem; }
+.filtri-lauki label { margin-top: 0.5rem; }
+.blakus-pogai { display: inline-block; margin: 1rem 0 0 1rem; padding: 0.5rem 0; }
+
 /* Statusa nozīmītes — vienmēr ar tekstu */
 .statuss { display: inline-block; padding: 0.1rem 0.5rem; border: 2px solid currentColor; border-radius: 4px; font-weight: 600; }
 .statuss-jauns { color: var(--akcents); }
@@ -134,9 +145,6 @@ th { background: #f0f0f0; }
 /* Reflow: 320 px platumā nekas neizlec ārā (1.4.10) */
 @media (max-width: 40rem) {
   .site-header { flex-direction: column; align-items: flex-start; }
-  table, thead, tbody, tr, th, td { display: block; }
-  thead { position: absolute; left: -999px; }
-  td::before { content: attr(data-label) ": "; font-weight: 600; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -18,7 +18,13 @@ LOMAS = {"iedzivotajs": "Iedzīvotājs", "darbinieks": "Darbinieks", "vaditajs":
 IZVELNE = [
     ("index", "Sākums", None),
     ("iesniegt", "Iesniegt iesniegumu", {"iedzivotajs", None}),
+    ("saraksts", "Iesniegumu saraksts", {"darbinieks"}),
 ]
+
+STATUSI = ["Jauns", "Apstrādē", "Atbildēts", "Noraidīts"]
+# CSS klase statusa nozīmītei; statuss vienmēr arī tekstā (1.4.1)
+STATUSA_KLASE = {"Jauns": "statuss-jauns", "Apstrādē": "statuss-apstrade",
+                 "Atbildēts": "statuss-atbildets", "Noraidīts": "statuss-noraidits"}
 
 EPASTS_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -49,7 +55,16 @@ def init_db():
 def inject_globals():
     loma = session.get("loma")
     izvelne = [(ep, teksts) for ep, teksts, lomas in IZVELNE if lomas is None or loma in lomas]
-    return {"loma": loma, "lomas_nosaukums": LOMAS.get(loma), "LOMAS": LOMAS, "izvelne": izvelne}
+    return {"loma": loma, "lomas_nosaukums": LOMAS.get(loma), "LOMAS": LOMAS, "izvelne": izvelne,
+            "STATUSA_KLASE": STATUSA_KLASE}
+
+
+def nav_pieejams(lapa, *lomas):
+    """Ja lietotāja loma nav starp atļautajām — lapa ar paskaidrojumu (403), citādi None."""
+    if session.get("loma") in lomas:
+        return None
+    vajadzigas = " vai ".join(LOMAS[l].lower() for l in lomas)
+    return render_template("nav_pieejams.html", lapa=lapa, vajadzigas=vajadzigas), 403
 
 
 @app.route("/")
@@ -142,6 +157,37 @@ def apstiprinajums(numurs):
     if iesniegums is None:
         abort(404)
     return render_template("apstiprinajums.html", i=iesniegums)
+
+
+@app.route("/saraksts")
+def saraksts():
+    """US-3: iesniegumu saraksts darbiniekam ar filtriem (GET) un meklēšanu."""
+    if (atbilde := nav_pieejams("Iesniegumu saraksts", "darbinieks")):
+        return atbilde
+    db = get_db()
+    temas = db.execute("SELECT id, nosaukums FROM temas ORDER BY id").fetchall()
+    filtrs = {
+        "statuss": request.args.get("statuss", ""),
+        "tema": request.args.get("tema", ""),
+        "q": request.args.get("q", "").strip(),
+    }
+    sql = ("SELECT i.numurs, i.izveidots, i.vards, i.statuss, t.nosaukums AS tema "
+           "FROM iesniegumi i JOIN temas t ON t.id = i.temas_id WHERE 1=1")
+    params = []
+    if filtrs["statuss"] in STATUSI:
+        sql += " AND i.statuss = ?"
+        params.append(filtrs["statuss"])
+    if filtrs["tema"].isdigit():
+        sql += " AND i.temas_id = ?"
+        params.append(int(filtrs["tema"]))
+    if filtrs["q"]:
+        sql += " AND (i.numurs LIKE ? OR i.vards LIKE ? OR i.adrese LIKE ? OR i.apraksts LIKE ?)"
+        params += [f"%{filtrs['q']}%"] * 4
+    sql += " ORDER BY i.izveidots DESC"
+    iesniegumi = db.execute(sql, params).fetchall()
+    ir_filtrs = any(filtrs.values())
+    return render_template("saraksts.html", iesniegumi=iesniegumi, temas=temas, statusi=STATUSI,
+                           filtrs=filtrs, ir_filtrs=ir_filtrs)
 
 
 @app.errorhandler(404)

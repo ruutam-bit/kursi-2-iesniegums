@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Iesniegumu saraksts{% endblock %}
+{% block content %}
+<h1>Iesniegumu saraksts</h1>
+
+<form method="get" action="{{ url_for('saraksts') }}" class="filtri">
+  <fieldset>
+    <legend>Filtrēt iesniegumus</legend>
+    <div class="filtri-lauki">
+      <div>
+        <label for="statuss">Statuss</label>
+        <select id="statuss" name="statuss">
+          <option value="">Visi statusi</option>
+          {% for s in statusi %}<option value="{{ s }}" {% if filtrs.statuss == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="tema">Tēma</label>
+        <select id="tema" name="tema">
+          <option value="">Visas tēmas</option>
+          {% for t in temas %}<option value="{{ t.id }}" {% if filtrs.tema == t.id|string %}selected{% endif %}>{{ t.nosaukums }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="q">Meklēt tekstā</label>
+        <input type="search" id="q" name="q" value="{{ filtrs.q }}" aria-describedby="q-palidziba">
+        <p class="palidziba" id="q-palidziba">Numurs, vārds, adrese vai apraksts</p>
+      </div>
+    </div>
+    <button type="submit">Rādīt iesniegumus</button>
+    {% if ir_filtrs %}<a class="blakus-pogai" href="{{ url_for('saraksts') }}">Notīrīt filtrus</a>{% endif %}
+  </fieldset>
+</form>
+
+{# Tabula var ritināt horizontāli šaurā ekrānā; apgabals sasniedzams ar tastatūru (1.4.10, 2.1.1) #}
+<div class="tabulas-ietvars" role="region" aria-labelledby="saraksts-caption" tabindex="0">
+<table>
+  <caption id="saraksts-caption">
+    Iesniegumi: {{ iesniegumi|length }}{% if ir_filtrs %} (atlasīti pēc filtra){% endif %}, jaunākie augšā
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Numurs</th>
+      <th scope="col">Iesniegts</th>
+      <th scope="col">Tēma</th>
+      <th scope="col">Iesniedzējs</th>
+      <th scope="col">Statuss</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in iesniegumi %}
+    <tr>
+      <th scope="row"><a href="/iesniegums/{{ i.numurs }}">Iesniegums {{ i.numurs }}</a></th>
+      <td>{{ i.izveidots }}</td>
+      <td>{{ i.tema }}</td>
+      <td>{{ i.vards }}</td>
+      <td><span class="statuss {{ STATUSA_KLASE[i.statuss] }}">{{ i.statuss }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Neviens iesniegums neatbilst filtram. Mainiet filtru vai notīriet to.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
